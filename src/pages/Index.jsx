@@ -1,14 +1,56 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Container, Grid, GridItem, Text, VStack, HStack, Heading } from "@chakra-ui/react";
 import { FaAppleAlt } from "react-icons/fa";
 
 const Index = () => {
+  const [snakePositions, setSnakePositions] = useState([22, 37, 52]);
+  const [direction, setDirection] = useState({ x: 0, y: -1 });
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      switch (event.key) {
+        case "ArrowUp":
+          setDirection({ x: 0, y: -1 });
+          break;
+        case "ArrowDown":
+          setDirection({ x: 0, y: 1 });
+          break;
+        case "ArrowLeft":
+          setDirection({ x: -1, y: 0 });
+          break;
+        case "ArrowRight":
+          setDirection({ x: 1, y: 0 });
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
+
+  useEffect(() => {
+    const moveSnake = () => {
+      setSnakePositions((prevPositions) => {
+        const newHead = prevPositions[0] + direction.x + direction.y * gridSize;
+        const newPositions = [newHead, ...prevPositions.slice(0, -1)];
+        return newPositions;
+      });
+    };
+
+    const gameLoop = setInterval(moveSnake, 200);
+
+    return () => clearInterval(gameLoop);
+  }, [direction]);
   // Define the size of the game area
   const gridSize = 15;
   const gridItems = Array.from({ length: gridSize * gridSize }, (_, i) => i);
 
-  // Create a static snake for demonstration
-  const snakePositions = [22, 37, 52];
+  // Removed static snake positions initialization since it is now managed by useState
 
   return (
     <Container maxW="container.md" py={10}>

@@ -46,9 +46,46 @@ const Index = () => {
 
     return () => clearInterval(gameLoop);
   }, [direction]);
-  // Define the size of the game area
   const gridSize = 15;
+  // Define the size of the game area
+  const [applePosition, setApplePosition] = useState(Math.floor(Math.random() * gridSize * gridSize));
   const gridItems = Array.from({ length: gridSize * gridSize }, (_, i) => i);
+
+  const checkCollisionWithApple = (head) => {
+    if (head === applePosition) {
+      setApplePosition(Math.floor(Math.random() * gridSize * gridSize));
+      return true;
+    }
+    return false;
+  };
+
+  const isOutsideGrid = (position) => {
+    const x = position % gridSize;
+    const y = Math.floor(position / gridSize);
+    return x < 0 || x >= gridSize || y < 0 || y >= gridSize;
+  };
+
+  useEffect(() => {
+    const moveSnake = () => {
+      setSnakePositions((prevPositions) => {
+        let newHead = prevPositions[0] + direction.x + direction.y * gridSize;
+        if (isOutsideGrid(newHead)) {
+          // Stop the game or handle the game over condition
+          return prevPositions;
+        }
+        if (checkCollisionWithApple(newHead)) {
+          // Increase the snake length by adding the new head without removing the tail
+          return [newHead, ...prevPositions];
+        }
+        const newPositions = [newHead, ...prevPositions.slice(0, -1)];
+        return newPositions;
+      });
+    };
+
+    const gameLoop = setInterval(moveSnake, 200);
+
+    return () => clearInterval(gameLoop);
+  }, [direction, applePosition]);
 
   // Removed static snake positions initialization since it is now managed by useState
 
